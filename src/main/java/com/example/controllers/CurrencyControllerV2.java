@@ -1,7 +1,7 @@
 package com.example.controllers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.example.Service.ExchangeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,38 +9,36 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.Currency;
-
+import java.util.Map;
 
 /**
- * Created by mateu on 07.03.2017.
+ * Created by mateu on 22.04.2017 , 21:10.
  *
- * Controller for currency convert
+ * Controller for api2
  */
 @RestController
-@RequestMapping("/currency")
-public class CurrencyController {
+@RequestMapping("api2")
+public class CurrencyControllerV2 {
+
+    @Autowired
+    private ExchangeService service;
 
 
-    private Logger logger = LoggerFactory.getLogger(CurrencyController.class);
+    @RequestMapping("checkService")
+    public String checkService(){
+        Map<String, String> rates = service.getExchange().getRates();
 
+        rates.forEach((x,y) -> System.out.println(x + y));
 
-    @RequestMapping(value = {"/"," * ","/something"})
-    public String home(){
-        return "choose your value after slash";
+        return service.getExchange().getBase();
     }
 
-    @RequestMapping("/{number}")
-    public Long multiplyByTwo(@PathVariable Long number){
-        logger.info("metoda multipleByTwo");
-        return 2 * number;
+    @RequestMapping("isWorking")
+    public Boolean isServiceWorking(){
+        return Boolean.TRUE;
     }
 
-    @RequestMapping("/num/{value}")
-    public String valueAndCurrency(@PathVariable Long value, @RequestParam String currency){
-        return value + " " + currency;
-    }
-
-    @RequestMapping("/exchange/{value}")
+    @RequestMapping("exchange/{value}")
     public String exchangeValue(@PathVariable Long value,
                                 @RequestParam(name = "f") String from,
                                 @RequestParam(name = "t") String to){
@@ -48,7 +46,7 @@ public class CurrencyController {
 
         Currency currencyFrom;
         Currency currencyTo;
-        BigDecimal rateExchange = new BigDecimal(Math.random() * 10 ).setScale(2, BigDecimal.ROUND_DOWN);
+        BigDecimal rateExchange; // = new BigDecimal(Math.random() * 10 ).setScale(2, BigDecimal.ROUND_DOWN);
         BigDecimal bigDecimalValue = new BigDecimal(String.valueOf(value));
         try {
             currencyFrom = Currency.getInstance(from.toUpperCase());
@@ -65,6 +63,11 @@ public class CurrencyController {
         } catch (IllegalArgumentException e){
             return "Choose valid second currency!";
         }
+
+        final Map<String, String> rates = service.getExchange(currencyFrom.toString(),
+                currencyTo.toString())
+                .getRates();
+        rateExchange =  new BigDecimal(rates.get(currencyTo.toString()));
 
         BigDecimal resultExchange = bigDecimalValue.multiply(rateExchange);
 
