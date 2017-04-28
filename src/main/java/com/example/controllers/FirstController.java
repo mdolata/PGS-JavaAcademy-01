@@ -1,12 +1,16 @@
 package com.example.controllers;
 
 import com.example.Entity.User;
-import com.example.Entity.UserDao;
+import com.example.Entity.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,7 +24,7 @@ import java.util.List;
 public class FirstController {
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @RequestMapping("hello")
     public String helloWorld() {
@@ -34,7 +38,7 @@ public class FirstController {
 
     @RequestMapping("tryDatabase")
     public String tryDataBase() {
-        User user = userDao.findByName("mateusz");
+        User user = userRepository.findByName("mateusz");
         if (user == null)
             return "User mateusz is not exists in database :(";
         System.out.println("user " + user.getId());
@@ -44,7 +48,14 @@ public class FirstController {
     @RequestMapping("saveUser")
     public String saveUser(){
         User user = new User("mateusz", "123");
-        userDao.save(user);
+
+        try {
+            userRepository.save(user);
+        } catch (ConstraintViolationException e){
+            return "User " + user.getName() + " is already exists!";
+        }
+
+
         return "created " + user.toString();
     }
 
@@ -54,16 +65,40 @@ public class FirstController {
                 new User("marysia","143"),
                 new User("olek","123"));
 
-        listOfUsers.forEach(s -> userDao.save(s));
+        listOfUsers.forEach(s -> userRepository.save(s));
 
-        String result = "";
-
-        for(User u : listOfUsers){
-            User user = userDao.findByName(u.getName());
-            result += user.getName();
-        }
-        return "created few users" + result;
+        return "created few users";
     }
 
+    @RequestMapping("getAllUsers")
+    public String getAllUsers(){
+        Iterable<User> integrableUsers = userRepository.findAll();
+        StringBuilder builder = new StringBuilder("");
+        for(User user : integrableUsers){
+            builder.append(user.toString())
+                .append("</br>\n");
+        }
+
+        return builder.toString();
+    }
+
+    @RequestMapping("changePassword/{name}")
+    public String changePassword(@PathVariable String name ,
+                                 @RequestParam String oldPassword,
+                                 @RequestParam String newPassword){
+        User user = userRepository.findByName(name);
+
+        if (user == null){
+            return "User named " + name + " doesn't exists!";
+        }
+        if (user.getPassword().equals(oldPassword)){
+            user.setPassword(newPassword);
+            user.setUpdateDate(new Date());
+            userRepository.save(user);
+            return "User " + name + " just change his password";
+        }
+
+        return "Wrong password for user " + name;
+    }
 
 }

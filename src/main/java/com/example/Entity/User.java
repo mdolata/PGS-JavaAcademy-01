@@ -1,10 +1,11 @@
 package com.example.Entity;
 
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * Created by mateu on 28.04.2017 , 00:49.
@@ -12,23 +13,28 @@ import javax.validation.constraints.NotNull;
  * Entity class for Users table
  */
 @Data
+@ToString(exclude = "password")
 @Entity
 @Table(name = "Users")
 public class User {
-    // TODO
-    // unique a name property
-    // this solution doesn't work for me
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    // has unique constraint in db
     @NotNull
-    @Column(name = "name" , unique = true)
     private String name;
 
     @NotNull
     private String password;
+
+    private String email;
+
+    @Column(updatable = false)
+    private Date insertDate;
+
+    private Date updateDate;
 
     public User() {}
 
