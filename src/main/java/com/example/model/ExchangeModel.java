@@ -2,6 +2,7 @@ package com.example.model;
 
 import lombok.Data;
 
+import javax.persistence.Entity;
 import java.util.Map;
 
 /**

@@ -1,6 +1,7 @@
 package com.example.controllers;
 
 import com.example.Service.ExchangeService;
+import com.example.model.ExchangeModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -53,6 +55,7 @@ public class CurrencyControllerV2 {
         BigDecimal rateExchange;
         BigDecimal valueBD;
 
+   //     ExchangeModel exchangeModel = service.getExchange()
         try {
             valueBD = new BigDecimal(value).setScale(2, BigDecimal.ROUND_DOWN);
 
@@ -91,5 +94,13 @@ public class CurrencyControllerV2 {
 
     private Currency getCurrencyFromString(String currency) throws IllegalArgumentException {
         return Currency.getInstance(currency.toUpperCase());
+    }
+
+    @RequestMapping("/download")
+    public String downloadRates(){
+        logger.info("Start");
+        service.downloadAndSaveRates();
+        logger.info("End");
+        return "Download method just finished" + new Date();
     }
 }

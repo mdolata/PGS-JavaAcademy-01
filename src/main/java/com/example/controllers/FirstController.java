@@ -2,6 +2,8 @@ package com.example.controllers;
 
 import com.example.Entity.User;
 import com.example.Entity.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,8 @@ public class FirstController {
     @Autowired
     private UserRepository userRepository;
 
+    private Logger logger = LoggerFactory.getLogger(FirstController.class);
+
     @RequestMapping("hello")
     public String helloWorld() {
         return "Hello World";
@@ -48,6 +52,7 @@ public class FirstController {
     @RequestMapping("saveUser")
     public String saveUser(){
         User user = new User("mateusz", "123");
+
 
         try {
             userRepository.save(user);
@@ -83,15 +88,16 @@ public class FirstController {
     }
 
     @RequestMapping("changePassword/{name}")
-    public String changePassword(@PathVariable String name ,
+    public String changePassword(@PathVariable String name,
                                  @RequestParam String oldPassword,
-                                 @RequestParam String newPassword){
+                                 @RequestParam String newPassword) {
         User user = userRepository.findByName(name);
 
-        if (user == null){
+        if (user == null) {
             return "User named " + name + " doesn't exists!";
         }
-        if (user.getPassword().equals(oldPassword)){
+
+        if (user.getPassword().equals(oldPassword)) {
             user.setPassword(newPassword);
             user.setUpdateDate(new Date());
             userRepository.save(user);
@@ -99,6 +105,13 @@ public class FirstController {
         }
 
         return "Wrong password for user " + name;
+    }
+
+
+
+    @RequestMapping(value = "usersCount")
+    public Long howManyUsers(){
+        return userRepository.count();
     }
 
 }

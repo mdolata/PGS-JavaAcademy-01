@@ -13,4 +13,8 @@ public interface ExchangeService {
     ExchangeModel getExchange();
 
     ExchangeModel getExchange(String base, String to);
+
+    ExchangeModel getExchange(String base);
+
+    void downloadAndSaveRates();
 }

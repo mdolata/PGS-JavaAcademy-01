@@ -24,6 +24,7 @@ public class User {
 
     // has unique constraint in db
     @NotNull
+    @Column(updatable = false)
     private String name;
 
     @NotNull

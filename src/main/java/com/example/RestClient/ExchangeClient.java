@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
  */
 @Service
 public class ExchangeClient {
-    private final String URL = "http://api.fixer.io/latest?symbols=%s&base=%s";
 
     @Autowired
     private RestTemplate rest;
@@ -22,11 +21,21 @@ public class ExchangeClient {
         return rest.getForObject(url, ExchangeModel.class);
     }
 
+    public ExchangeModel getExchangeModel(String base){
+        return rest.getForObject(getFormatUrl(base, ""), ExchangeModel.class);
+    }
+
     public ExchangeModel getExchangeModel(String base, String symbol){
         return rest.getForObject(getFormatUrl(base,symbol), ExchangeModel.class);
     }
 
     private String getFormatUrl(String base, String symbol){
-        return String.format(URL, symbol, base);
+        String localURL = "http://api.fixer.io/latest?";
+        String BASE = "base=%s&";
+        String SYMBOLS = "symbols=%s&";
+
+        localURL += (base.isEmpty()) ? "" : BASE;
+        localURL += (symbol.isEmpty()) ? "" : SYMBOLS;
+        return String.format(localURL, base, symbol);
     }
 }
